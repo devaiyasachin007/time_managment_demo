@@ -1,0 +1,13 @@
+.home {
+  margin: 0 50px auto;
+}
+.m-l-10 {
+  margin-left:10px;
+}
+.errorMsg {
+  color: red;
+  font-size: 12px;
+}
+.heading {
+  padding-bottom: 15px;
+}
