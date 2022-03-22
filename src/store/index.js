@@ -24,6 +24,21 @@ export default new Vuex.Store({
     deleteEmployee (state, employee) {
       state.listEmployee.splice(employee.index, 1)
       setLocalStorage('employeeList', state.listEmployee) // Updated to localStorage
+    },
+    updateTime (state, time) {
+      if (!time.isEdit) {
+        state.listTimes.push(time)
+      } else {
+        const editTime = state.listTimes.find((item) => { return item.dateSelect === time.dateSelect })
+        editTime.startTime = time.startTime
+        editTime.endTime = time.endTime
+        editTime.taskDesc = time.taskDesc
+      }
+      setLocalStorage('timeList', state.listTimes) // Updated to localStorage
+    },
+    deleteTime (state, time) {
+      state.listTimes.splice(time.index, 1)
+      setLocalStorage('timeList', state.listTimes) // Updated to localStorage
     }
   },
   actions: {
@@ -32,7 +47,14 @@ export default new Vuex.Store({
     },
     deleteStoreEmployee ({ commit }, data) {
       commit('deleteEmployee', data.employee)
+    },
+    updatelistTime ({ commit }, data) {
+      commit('updateTime', data.time)
+    },
+    deleteStoreTime ({ commit }, data) {
+      commit('deleteTime', data.time)
     }
+
   },
   modules: {
   }
