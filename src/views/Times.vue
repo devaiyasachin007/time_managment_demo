@@ -4,22 +4,27 @@
       <div style="float:right;margin:10px;">
       <b-button size="sm" @click="addTime">Add New Time</b-button>
     </div>
-    <b-table striped hover :items="bindListEmployees" responsive="sm" :fields="fields" show-empty
+    <b-table striped hover :items="bindListTimes" responsive="sm" :fields="fields" show-empty
       :current-page="currentPage"
 
       :per-page="perPage"
       @filtered="onFiltered">
       <template v-slot:cell(action)="data">
-        <b-button size="sm" class="mr-1" @click="editEmployee(data)">
+        <b-button size="sm" class="mr-1" @click="editTime(data)">
           Edit
         </b-button>
-        <b-button size="sm" @click="deleteEmployee(data)">
+        <b-button size="sm" @click="deleteTime(data)">
           Delete
         </b-button>
       </template>
-      <template v-slot:cell(name)="data">
-        <!-- `data.value` is the value after formatted by the Formatter -->
-        <a :href="`#${data.value.replace(/[^a-z]+/i,'-').toLowerCase()}`">{{ data.value }}</a>
+      <template v-slot:cell(startTime)="data">
+        {{ convertTimeIntoAmPmFormat(data.value) }}
+      </template>
+       <template v-slot:cell(endTime)="data">
+        {{ convertTimeIntoAmPmFormat(data.value) }}
+      </template>
+        <template v-slot:cell(difference)="data">
+        {{ timediff(data.item.startTime, data.item.endTime) }}
       </template>
     </b-table>
     <b-col sm="3" md="3" class="my-1 float-right">
@@ -50,16 +55,16 @@ export default {
     return {
       fields: [
         {
-          key: 'id', label: 'Start Time', sortable: true, sortDirection: 'desc'
+          key: 'startTime', label: 'Start Time', sortable: false, sortDirection: 'desc'
         },
         {
-          key: 'name', label: 'End Time', sortable: true, class: 'text-center'
+          key: 'endTime', label: 'End Time', sortable: false, class: 'text-center'
         },
         {
-          key: 'email', label: 'Minutes', sortable: true
+          key: 'difference', label: 'Minutes', sortable: false
         },
         {
-          key: 'contact', label: 'Task Description', sortable: true
+          key: 'taskDesc', label: 'Task Description', sortable: false
         },
         {
           key: 'action', label: 'Actions'
@@ -67,7 +72,7 @@ export default {
       ],
       currentPage: 1,
       totalRows: 0,
-      perPage: 2,
+      perPage: 100,
       sortBy: '',
       sortDesc: false,
       sortDirection: 'asc',
@@ -85,13 +90,12 @@ export default {
           return { text: f.label, value: f.key }
         })
     },
-    bindListEmployees () {
-      console.log(this.$store.state.listTimes)
+    bindListTimes () {
       return this.$store.state.listTimes
     }
   },
   watch: {
-    bindListEmployees: {
+    bindListTimes: {
       deep: true,
       handler: function (list) {
         this.totalRows = list.length
@@ -99,7 +103,7 @@ export default {
     }
   },
   created () {
-    this.loadlistEmployees()
+    this.loadlistTimes()
   },
   methods: {
     // New
@@ -107,20 +111,8 @@ export default {
       this.$root.$emit('add-time', {})
       this.$bvModal.show('addNewTime')
     },
-    // Old
-    loadlistEmployees () {
-      this.totalRows = this.$store.state.listTimes.length
-    },
-    addEmployee () {
-      this.$root.$emit('add-employee', {})
-      this.$bvModal.show('addNewEmployee')
-    },
-    editEmployee (employee) {
-      this.$root.$emit('edit-employee', Object.assign({}, employee.item))
-      this.$bvModal.show('addNewEmployee')
-    },
-    deleteEmployee (employee) {
-      this.$bvModal.msgBoxConfirm('Please confirm that you want to delete employee.', {
+    deleteTime (time) {
+      this.$bvModal.msgBoxConfirm('Please confirm that you want to delete Time Slot.', {
         title: 'Please Confirm',
         size: 'mm',
         buttonSize: 'sm',
@@ -133,9 +125,34 @@ export default {
       })
         .then((value) => {
           if (value) {
-            this.$store.dispatch('deleteStoreEmployee', { employee: employee }) // dispatch store action
+            this.$store.dispatch('deleteStoreTime', { times: time }) // dispatch store action
           }
         })
+    },
+    loadlistTimes () {
+      this.totalRows = this.$store.state.listTimes.length
+    },
+    convertTimeIntoAmPmFormat (time) {
+      time = time.split(':')
+      time[3] = time[0] < 12 ? 'AM' : 'PM'
+
+      time[0] = time[0] % 12 || 12
+      time = time[0] + ':' + time[1] + ' ' + time[3]
+      return time // return adjusted time or original string
+    },
+    timediff (valuestart, valuestop) {
+      const today = new Date()
+      const td = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + (today.getDate() + 1)).slice(-2)
+      const date1 = new Date(td + ' ' + valuestart).getTime()
+      const date2 = new Date(td + ' ' + valuestop).getTime()
+
+      const msec = date2 - date1
+      const mins = Math.floor(msec / 60000)
+      return mins + ' Minutes'
+    },
+    editTime (time) {
+      this.$root.$emit('edit-time', Object.assign({}, time.item))
+      this.$bvModal.show('addNewTime')
     },
     onFiltered (filteredItems) {
       // Trigger pagination to update the number of buttons/pages due to filtering

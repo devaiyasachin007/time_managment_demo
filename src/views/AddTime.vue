@@ -25,7 +25,6 @@
             v-model="time.startTime"
             required
             now-button
-            :disabled="time.isEdit"
             placeholder="Select Start Time">
           </b-form-timepicker>
           <span v-if="submitted && $v.time.startTime.$error" class="errorMsg">Please Select Start Time</span>
@@ -38,8 +37,7 @@
             id="input-2"
             v-model="time.endTime"
             required
-              now-button
-            :disabled="time.isEdit"
+            now-button
             placeholder="Select End Time">
           </b-form-timepicker>
           <span v-if="submitted && $v.time.endTime.$error" class="errorMsg">Please Select End Time</span>
@@ -77,6 +75,7 @@
             @click="resetForm">
             Cancel
           </b-button>
+
         </div>
       </template>
     </b-modal>
@@ -116,6 +115,7 @@ export default {
     })
     this.$root.$on('add-time', (data) => {
       this.time = {}
+      this.time.id = Date.now()
       this.time.isEdit = false
       this.submitted = false
     })
