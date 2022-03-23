@@ -1,14 +1,31 @@
 <template>
   <div class="home">
     <h3 class="heading">Time Management</h3>
-      <div style="float:right;margin:10px;">
+<div>
+      <b-row>
+         <b-col lg="3" class="my-1">
+          <b-form-datepicker
+            id="input-5"
+            required
+            v-model="selectDate"
+            placeholder="Select Date">
+          </b-form-datepicker>
+         </b-col>
+        </b-row>
+        </div>
+    <div style="float:right;margin:10px;">
       <b-button size="sm" @click="addTime">Add New Time</b-button>
     </div>
-    <b-table striped hover :items="bindListTimes" responsive="sm" :fields="fields" show-empty
-      :current-page="currentPage"
-
-      :per-page="perPage"
-      @filtered="onFiltered">
+    <b-table hover bordered :items="filterData" responsive="sm" :fields="fields" show-empty>
+      <template v-slot:cell(startTime)="data">
+        {{ convertTimeIntoAmPmFormat(data.value) }}
+      </template>
+       <template v-slot:cell(endTime)="data">
+        {{ convertTimeIntoAmPmFormat(data.value) }}
+      </template>
+        <template v-slot:cell(difference)="data">
+        {{ timediff(data.item.startTime, data.item.endTime) }} Minutes
+      </template>
       <template v-slot:cell(action)="data">
         <b-button size="sm" class="mr-1" @click="editTime(data)">
           Edit
@@ -17,26 +34,14 @@
           Delete
         </b-button>
       </template>
-      <template v-slot:cell(startTime)="data">
-        {{ convertTimeIntoAmPmFormat(data.value) }}
-      </template>
-       <template v-slot:cell(endTime)="data">
-        {{ convertTimeIntoAmPmFormat(data.value) }}
-      </template>
-        <template v-slot:cell(difference)="data">
-        {{ timediff(data.item.startTime, data.item.endTime) }}
-      </template>
+
     </b-table>
-    <b-col sm="3" md="3" class="my-1 float-right">
-      <b-pagination
-        v-model="currentPage"
-        :total-rows="totalRows"
-        :per-page="perPage"
-        align="fill"
-        size="sm"
-        class="my-0">
-      </b-pagination>
-    </b-col>
+  <div style="float:left;margin:10px;">
+      <b-button size="sm">Day Total Min: {{ totalTimeInMin }} </b-button>
+    </div>
+    <div style="float:left;margin:10px;">
+      <b-button size="sm">Day Total HR: {{ totalTimeInHr }}</b-button>
+    </div>
     <AddTime />
   </div>
 </template>
@@ -55,7 +60,10 @@ export default {
     return {
       fields: [
         {
-          key: 'startTime', label: 'Start Time', sortable: false, sortDirection: 'desc'
+          key: 'dateSelect', label: 'Date', sortable: false
+        },
+        {
+          key: 'startTime', label: 'Start Time', sortable: false
         },
         {
           key: 'endTime', label: 'End Time', sortable: false, class: 'text-center'
@@ -70,40 +78,27 @@ export default {
           key: 'action', label: 'Actions'
         }
       ],
+      displayData: this.$store.state.listTimes,
       currentPage: 1,
-      totalRows: 0,
-      perPage: 100,
-      sortBy: '',
-      sortDesc: false,
-      sortDirection: 'asc',
-      filter: null,
-      filterOn: [],
-      pageOptions: [2, 5, 10, 15]
+      selectDate: new Date().toISOString().slice(0, 10)
     }
   },
   computed: {
-    sortOptions () {
-      // Create an options list from our fields
-      return this.fields
-        .filter(f => f.sortable)
-        .map(f => {
-          return { text: f.label, value: f.key }
+    filterData () {
+      return this.displayData
+        .filter((data) => {
+          return data.dateSelect === this.selectDate
         })
     },
-    bindListTimes () {
-      return this.$store.state.listTimes
+    totalTimeInMin () {
+      const total = this.filterData.reduce((previousValue, currentValue) => {
+        return previousValue + this.timediff(currentValue.startTime, currentValue.endTime)
+      }, 0)
+      return total
+    },
+    totalTimeInHr () {
+      return Math.floor(this.totalTimeInMin / 60) + ':' + this.totalTimeInMin % 60
     }
-  },
-  watch: {
-    bindListTimes: {
-      deep: true,
-      handler: function (list) {
-        this.totalRows = list.length
-      }
-    }
-  },
-  created () {
-    this.loadlistTimes()
   },
   methods: {
     // New
@@ -129,9 +124,6 @@ export default {
           }
         })
     },
-    loadlistTimes () {
-      this.totalRows = this.$store.state.listTimes.length
-    },
     convertTimeIntoAmPmFormat (time) {
       time = time.split(':')
       time[3] = time[0] < 12 ? 'AM' : 'PM'
@@ -148,16 +140,11 @@ export default {
 
       const msec = date2 - date1
       const mins = Math.floor(msec / 60000)
-      return mins + ' Minutes'
+      return mins
     },
     editTime (time) {
       this.$root.$emit('edit-time', Object.assign({}, time.item))
       this.$bvModal.show('addNewTime')
-    },
-    onFiltered (filteredItems) {
-      // Trigger pagination to update the number of buttons/pages due to filtering
-      this.totalRows = filteredItems.length
-      this.currentPage = 1
     }
   }
 }

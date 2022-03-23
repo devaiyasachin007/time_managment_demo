@@ -10,7 +10,6 @@
             id="input-0"
             v-model="time.dateSelect"
             required
-            now-button
             :disabled="time.isEdit"
             placeholder="Select Date">
           </b-form-datepicker>
