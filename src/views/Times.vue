@@ -14,7 +14,10 @@
     <div style="float:right;margin:10px;">
       <b-button size="sm" @click="addTime">Add New Time</b-button>
     </div>
-    <div id="exportPng">
+     <div style="float:right;margin:10px;">
+      <b-button size="sm" @click="printThis">Export as PNG</b-button>
+    </div>
+    <div ref="exportPng">
       <b-table hover bordered :items="filterData" responsive="sm" :fields="fields" show-empty>
         <template v-slot:cell(startTime)="data">
           {{ convertTimeIntoAmPmFormat(data.value) }}
@@ -34,15 +37,15 @@
           </b-button>
         </template>
       </b-table>
-      <div style="float:left;margin:10px;">
-        <b-button size="sm">Day: {{ selectDate }}</b-button>
-      </div>
-      <div style="float:left;margin:10px;">
-        <b-button size="sm">Day Total Min: {{ totalTimeInMin }} </b-button>
-      </div>
-      <div style="float:left;margin:10px;">
-        <b-button size="sm">Day Total HR: {{ totalTimeInHr }}</b-button>
-      </div>
+        <div style="float:left;margin:10px;">
+          <b-button size="sm">Day: {{ selectDate }}</b-button>
+        </div>
+        <div style="float:left;margin:10px;">
+          <b-button size="sm">Day Total Min: {{ totalTimeInMin }} </b-button>
+        </div>
+        <div style="float:left;margin:10px;">
+          <b-button size="sm">Day Total HR: {{ totalTimeInHr }}</b-button>
+        </div>
       </div>
       <AddTime />
     </div>
@@ -51,7 +54,9 @@
 <script>
 import { BTable } from 'bootstrap-vue'
 import AddTime from './AddTime.vue'
-
+import html2canvas from 'html2canvas'
+import canvs2Image from '@/util/canvas2image'
+import { saveAs } from 'file-saver'
 export default {
   name: 'Times',
   components: {
@@ -103,6 +108,19 @@ export default {
     }
   },
   methods: {
+    printThis () {
+      const el = this.$refs.exportPng
+
+      html2canvas(el)
+        .then(canvas => {
+          const img = canvs2Image.getImage(canvas)
+          console.log(img)
+          saveAs(img, 's.png')
+        })
+        .catch(err => {
+          console.log('error', err)
+        })
+    },
     // New
     addTime () {
       this.$root.$emit('add-time', {})
