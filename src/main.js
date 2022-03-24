@@ -5,7 +5,9 @@ import App from './App.vue'
 import router from './router'
 import store from './store'
 import '@/assets/library/css'
+import JsonCSV from 'vue-json-csv'
 
+Vue.component('downloadCsv', JsonCSV)
 Vue.config.productionTip = false
 Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)

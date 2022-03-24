@@ -17,38 +17,51 @@
      <div style="float:right;margin:10px;">
       <b-button size="sm" @click="printThis">Export as PNG</b-button>
     </div>
-    <div ref="exportPng">
-      <b-table hover bordered :items="filterData" responsive="sm" :fields="fields" show-empty>
-        <template v-slot:cell(startTime)="data">
-          {{ convertTimeIntoAmPmFormat(data.value) }}
-        </template>
-          <template v-slot:cell(endTime)="data">
-          {{ convertTimeIntoAmPmFormat(data.value) }}
-        </template>
-          <template v-slot:cell(difference)="data">
-          {{ timediff(data.item.startTime, data.item.endTime) }} Minutes
-        </template>
-        <template v-slot:cell(action)="data">
-          <b-button size="sm" class="mr-1" @click="editTime(data)">
-            Edit
-          </b-button>
-          <b-button size="sm" @click="deleteTime(data)">
-            Delete
-          </b-button>
-        </template>
-      </b-table>
-        <div style="float:left;margin:10px;">
-          <b-button size="sm">Day: {{ selectDate }}</b-button>
-        </div>
-        <div style="float:left;margin:10px;">
-          <b-button size="sm">Day Total Min: {{ totalTimeInMin }} </b-button>
-        </div>
-        <div style="float:left;margin:10px;">
-          <b-button size="sm">Day Total HR: {{ totalTimeInHr }}</b-button>
-        </div>
-      </div>
-      <AddTime />
+     <div style="float:right;margin:10px;">
+       <download-csv
+            :data="filterData"
+            :name="dataFile"
+            :labels="labels"
+            :fields="fields2"
+        >
+          <b-button size="sm">
+  Export as CSV
+    </b-button>
+        </download-csv>
+
+  </div>
+  <div ref="exportPng">
+    <b-table hover bordered :items="filterData" responsive="sm" :fields="fields" show-empty>
+      <template v-slot:cell(startTime)="data">
+        {{ convertTimeIntoAmPmFormat(data.value) }}
+      </template>
+        <template v-slot:cell(endTime)="data">
+        {{ convertTimeIntoAmPmFormat(data.value) }}
+      </template>
+        <template v-slot:cell(difference)="data">
+        {{ timediff(data.item.startTime, data.item.endTime) }} Minutes
+      </template>
+      <template v-slot:cell(action)="data">
+        <b-button size="sm" class="mr-1" @click="editTime(data)">
+          Edit
+        </b-button>
+        <b-button size="sm" @click="deleteTime(data)">
+          Delete
+        </b-button>
+      </template>
+    </b-table>
+    <div style="float:left;margin:10px;">
+      <b-button size="sm">Day: {{ selectDate }}</b-button>
     </div>
+    <div style="float:left;margin:10px;">
+      <b-button size="sm">Day Total Min: {{ totalTimeInMin }} </b-button>
+    </div>
+    <div style="float:left;margin:10px;">
+      <b-button size="sm">Day Total HR: {{ totalTimeInHr }}</b-button>
+    </div>
+  </div>
+  <AddTime />
+  </div>
 </template>
 
 <script>
@@ -57,6 +70,7 @@ import AddTime from './AddTime.vue'
 import html2canvas from 'html2canvas'
 import canvs2Image from '@/util/canvas2image'
 import { saveAs } from 'file-saver'
+
 export default {
   name: 'Times',
   components: {
@@ -65,6 +79,14 @@ export default {
   },
   data () {
     return {
+      dataFile: 'my_export.csv',
+      labels: {
+        startTime: 'start Time',
+        endTime: 'end Time',
+        difference: 'Min difference',
+        taskDesc: 'task Desc'
+      },
+      fields2: ['startTime', 'endTime', 'difference', 'taskDesc'],
       fields: [
         {
           key: 'dateSelect', label: 'Date', sortable: false
@@ -114,8 +136,7 @@ export default {
       html2canvas(el)
         .then(canvas => {
           const img = canvs2Image.getImage(canvas)
-          console.log(img)
-          saveAs(img, 's.png')
+          saveAs(img, this.selectDate + '.png')
         })
         .catch(err => {
           console.log('error', err)
