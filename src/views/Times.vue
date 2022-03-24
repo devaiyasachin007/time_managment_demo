@@ -17,6 +17,17 @@
      <div style="float:right;margin:10px;">
       <b-button size="sm" @click="printThis">Export as PNG</b-button>
     </div>
+    <div style="float:right;margin:10px;">
+     <b-button size="sm" >
+       <export-excel
+        :data = "filterData"
+        :fields = "json_fields"
+        name = "filename.xls"
+      >
+        Download Excel
+      </export-excel>
+      </b-button>
+    </div>
     <div ref="exportPng">
       <b-table hover bordered :items="filterData" responsive="sm" :fields="fields" show-empty>
         <template v-slot:cell(startTime)="data">
@@ -65,6 +76,26 @@ export default {
   },
   data () {
     return {
+      json_fields: {
+        'Start Time': {
+          field: 'startTime',
+          callback: (value) => {
+            return this.convertTimeIntoAmPmFormat(value)
+          }
+        },
+        'End Time': {
+          field: 'endTime',
+          callback: (value) => {
+            return this.convertTimeIntoAmPmFormat(value)
+          }
+        },
+        'Minutes difference': {
+          callback: (value) => {
+            return this.timediff(value.startTime, value.endTime) + ' Minutes'
+          }
+        },
+        'Task Description': 'taskDesc'
+      },
       fields: [
         {
           key: 'dateSelect', label: 'Date', sortable: false
