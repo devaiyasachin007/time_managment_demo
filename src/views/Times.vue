@@ -1,49 +1,51 @@
 <template>
   <div class="home">
     <h3 class="heading">Time Management</h3>
-<div>
-      <b-row>
-         <b-col lg="3" class="my-1">
-          <b-form-datepicker
-            id="input-5"
-            required
-            v-model="selectDate"
-            placeholder="Select Date">
-          </b-form-datepicker>
-         </b-col>
-        </b-row>
-        </div>
+    <b-row>
+      <b-col lg="3" class="my-1">
+      <b-form-datepicker
+        id="input-5"
+        required
+        v-model="selectDate"
+        placeholder="Select Date">
+      </b-form-datepicker>
+      </b-col>
+    </b-row>
     <div style="float:right;margin:10px;">
       <b-button size="sm" @click="addTime">Add New Time</b-button>
     </div>
-    <b-table hover bordered :items="filterData" responsive="sm" :fields="fields" show-empty>
-      <template v-slot:cell(startTime)="data">
-        {{ convertTimeIntoAmPmFormat(data.value) }}
-      </template>
-       <template v-slot:cell(endTime)="data">
-        {{ convertTimeIntoAmPmFormat(data.value) }}
-      </template>
-        <template v-slot:cell(difference)="data">
-        {{ timediff(data.item.startTime, data.item.endTime) }} Minutes
-      </template>
-      <template v-slot:cell(action)="data">
-        <b-button size="sm" class="mr-1" @click="editTime(data)">
-          Edit
-        </b-button>
-        <b-button size="sm" @click="deleteTime(data)">
-          Delete
-        </b-button>
-      </template>
-
-    </b-table>
-  <div style="float:left;margin:10px;">
-      <b-button size="sm">Day Total Min: {{ totalTimeInMin }} </b-button>
+    <div id="exportPng">
+      <b-table hover bordered :items="filterData" responsive="sm" :fields="fields" show-empty>
+        <template v-slot:cell(startTime)="data">
+          {{ convertTimeIntoAmPmFormat(data.value) }}
+        </template>
+          <template v-slot:cell(endTime)="data">
+          {{ convertTimeIntoAmPmFormat(data.value) }}
+        </template>
+          <template v-slot:cell(difference)="data">
+          {{ timediff(data.item.startTime, data.item.endTime) }} Minutes
+        </template>
+        <template v-slot:cell(action)="data">
+          <b-button size="sm" class="mr-1" @click="editTime(data)">
+            Edit
+          </b-button>
+          <b-button size="sm" @click="deleteTime(data)">
+            Delete
+          </b-button>
+        </template>
+      </b-table>
+      <div style="float:left;margin:10px;">
+        <b-button size="sm">Day: {{ selectDate }}</b-button>
+      </div>
+      <div style="float:left;margin:10px;">
+        <b-button size="sm">Day Total Min: {{ totalTimeInMin }} </b-button>
+      </div>
+      <div style="float:left;margin:10px;">
+        <b-button size="sm">Day Total HR: {{ totalTimeInHr }}</b-button>
+      </div>
+      </div>
+      <AddTime />
     </div>
-    <div style="float:left;margin:10px;">
-      <b-button size="sm">Day Total HR: {{ totalTimeInHr }}</b-button>
-    </div>
-    <AddTime />
-  </div>
 </template>
 
 <script>
