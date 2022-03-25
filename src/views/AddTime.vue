@@ -40,6 +40,7 @@
             placeholder="Select End Time">
           </b-form-timepicker>
           <span v-if="submitted && $v.time.endTime.$error" class="errorMsg">Please Select End Time</span>
+          <span class="errorMsg">{{invalidTimeError}}</span>
         </b-form-group>
         <b-form-group
           id="input-group-3"
@@ -95,7 +96,8 @@ export default {
         endTime: '',
         taskDesc: ''
       },
-      submitted: false
+      submitted: false,
+      invalidTimeError: ''
     }
   },
   validations: {
@@ -125,18 +127,37 @@ export default {
   },
   methods: {
     submitForm () {
+      this.invalidTimeError = ''
       this.submitted = true
+      const timeDiff = this.timediff(this.time.startTime, this.time.endTime)
       this.$v.$touch()
-      if (this.$v.$invalid) {
-        return
+      if (timeDiff > 0) {
+        if (this.$v.$invalid) {
+          return
+        }
+        this.$bvModal.hide('addNewTime')
+        this.$store.dispatch('updatelistTime', { times: this.time }) // dispatch store action
+        this.invalidTimeError = ''
+      } else {
+        this.submitted = false
+        this.invalidTimeError = 'End Time Not Valid'
       }
-      this.$bvModal.hide('addNewTime')
-      this.$store.dispatch('updatelistTime', { times: this.time }) // dispatch store action
     },
     resetForm () {
       this.time = {}
       this.time.isEdit = false
       this.submitted = false
+      this.invalidTimeError = ''
+    },
+    timediff (valuestart, valuestop) {
+      const today = new Date()
+      const td = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + (today.getDate() + 1)).slice(-2)
+      const date1 = new Date(td + ' ' + valuestart).getTime()
+      const date2 = new Date(td + ' ' + valuestop).getTime()
+
+      const msec = date2 - date1
+      const mins = Math.floor(msec / 60000)
+      return mins
     }
   }
 }
