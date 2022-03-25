@@ -20,6 +20,7 @@
     <div style="float:right;margin:10px;">
      <b-button size="sm" >
        <export-excel
+        :footer = "footerData"
         :data = "filterData"
         :fields = "json_fields"
         name = "filename.xls"
@@ -136,6 +137,13 @@ export default {
     },
     totalTimeInHr () {
       return Math.floor(this.totalTimeInMin / 60) + ':' + this.totalTimeInMin % 60
+    },
+    footerData () {
+      return [
+        'Date: ' + this.selectDate,
+        'Day Total Min: ' + this.totalTimeInMin,
+        'Day Total HR: ' + this.totalTimeInHr
+      ]
     }
   },
   methods: {
