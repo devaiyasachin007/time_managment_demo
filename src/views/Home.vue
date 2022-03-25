@@ -1,239 +1,167 @@
 <template>
   <div class="home">
-    <h3 class="heading">Employee Management</h3>
-    <div>
-      <b-row>
-        <b-col lg="6" class="my-1">
-          <b-form-group
-            label="Sort"
-            label-cols-sm="3"
-            label-align-sm="right"
-            label-size="sm"
-            label-for="sortBySelect"
-            class="mb-0">
-            <b-input-group size="sm">
-              <b-form-select v-model="sortBy" id="sortBySelect" :options="sortOptions" class="w-75">
-                <template v-slot:first>
-                  <option value="">Select</option>
-                </template>
-              </b-form-select>
-              <b-form-select v-model="sortDesc" size="sm" :disabled="!sortBy" class="w-25">
-                <option :value="false">Asc</option>
-                <option :value="true">Desc</option>
-              </b-form-select>
-            </b-input-group>
-          </b-form-group>
-        </b-col>
-        <b-col lg="2" class="my-1">
-        </b-col>
-        <b-col lg="4" class="my-1">
-          <b-form-group
-            label="Initial sort"
-            label-cols-sm="3"
-            label-align-sm="right"
-            label-size="sm"
-            label-for="initialSortSelect"
-            class="mb-0">
-            <b-form-select
-              v-model="sortDirection"
-              id="initialSortSelect"
-              size="sm"
-              :options="['asc', 'desc', 'last']">
-            </b-form-select>
-          </b-form-group>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col lg="6" class="my-1">
-          <b-form-group
-            label="Filter"
-            label-cols-sm="3"
-            label-align-sm="right"
-            label-size="sm"
-            label-for="filterInput"
-            class="mb-0">
-            <b-input-group size="sm">
-              <b-form-input
-                v-model="filter"
-                type="search"
-                id="filterInput"
-                placeholder="Type to Search"
-              ></b-form-input>
-              <b-input-group-append>
-                <b-button :disabled="!filter" @click="filter = ''">Clear</b-button>
-              </b-input-group-append>
-            </b-input-group>
-          </b-form-group>
-        </b-col>
-        <b-col lg="2" class="my-1">
-        </b-col>
-        <b-col lg="4" class="my-1">
-          <b-form-group
-            label="Filter On"
-            label-cols-sm="3"
-            label-align-sm="right"
-            label-size="sm"
-            description="Leave all unchecked to filter on all data"
-            class="mb-0">
-            <b-form-checkbox-group v-model="filterOn" class="mt-1">
-              <b-form-checkbox value="id">ID</b-form-checkbox>
-              <b-form-checkbox value="name">Name</b-form-checkbox>
-              <b-form-checkbox value="email">Email</b-form-checkbox>
-              <b-form-checkbox value="contact">Contact</b-form-checkbox>
-            </b-form-checkbox-group>
-          </b-form-group>
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col sm="5" md="6" class="my-1">
-          <b-form-group
-            label="Per page"
-            label-cols-sm="6"
-            label-cols-md="4"
-            label-cols-lg="3"
-            label-align-sm="right"
-            label-size="sm"
-            label-for="perPageSelect"
-            class="mb-0">
-            <b-form-select
-              v-model="perPage"
-              id="perPageSelect"
-              size="sm"
-              :options="pageOptions"
-            ></b-form-select>
-          </b-form-group>
-        </b-col>
-      </b-row>
-    </div>
+    <h3 class="heading">Time Management</h3>
+    <b-row>
+      <b-col lg="3" class="my-1">
+      <b-form-datepicker
+        id="input-5"
+        required
+        v-model="selectDate"
+        placeholder="Select Date">
+      </b-form-datepicker>
+      </b-col>
+    </b-row>
     <div style="float:right;margin:10px;">
-      <b-button size="sm" @click="addEmployee">Add New Employee</b-button>
-    </div>
-      <div style="float:right;margin:10px;">
       <b-button size="sm" @click="addTime">Add New Time</b-button>
     </div>
-    <b-table striped hover :items="bindListEmployees" responsive="sm" :fields="fields" show-empty
-      :current-page="currentPage"
-      :sort-by.sync="sortBy"
-      :sort-desc.sync="sortDesc"
-      :sort-direction="sortDirection"
-      :filter="filter"
-      :filterIncludedFields="filterOn"
-      :per-page="perPage"
-      @filtered="onFiltered">
-      <template v-slot:cell(action)="data">
-        <b-button size="sm" class="mr-1" @click="editEmployee(data)">
-          Edit
-        </b-button>
-        <b-button size="sm" @click="deleteEmployee(data)">
-          Delete
-        </b-button>
-      </template>
-      <template v-slot:cell(name)="data">
-        <!-- `data.value` is the value after formatted by the Formatter -->
-        <a :href="`#${data.value.replace(/[^a-z]+/i,'-').toLowerCase()}`">{{ data.value }}</a>
-      </template>
-    </b-table>
-    <b-col sm="3" md="3" class="my-1 float-right">
-      <b-pagination
-        v-model="currentPage"
-        :total-rows="totalRows"
-        :per-page="perPage"
-        align="fill"
-        size="sm"
-        class="my-0">
-      </b-pagination>
-    </b-col>
-    <AddEmployee />
-    <AddTime />
-  </div>
+     <div style="float:right;margin:10px;">
+      <b-button size="sm" @click="printThis">Export as PNG</b-button>
+    </div>
+    <div style="float:right;margin:10px;">
+     <b-button size="sm" >
+       <export-excel
+        :footer = "footerData"
+        :data = "filterData"
+        :fields = "json_fields"
+        name = "filename.xls"
+      >
+        Download Excel
+      </export-excel>
+      </b-button>
+    </div>
+    <div ref="exportPng">
+      <b-table hover bordered :items="filterData" responsive="sm" :fields="fields" show-empty >
+        <template v-slot:cell(startTime)="data">
+          {{ convertTimeIntoAmPmFormat(data.value) }}
+        </template>
+          <template v-slot:cell(endTime)="data">
+          {{ convertTimeIntoAmPmFormat(data.value) }}
+        </template>
+          <template v-slot:cell(difference)="data">
+          {{ timediff(data.item.startTime, data.item.endTime) }} Minutes
+        </template>
+        <template v-slot:cell(action)="data">
+          <b-button size="sm" class="mr-1" @click="editTime(data)">
+            Edit
+          </b-button>
+          <b-button size="sm" @click="deleteTime(data)">
+            Delete
+          </b-button>
+        </template>
+        <template v-slot:custom-foot>
+          <tr>
+            <th>Day: {{ selectDate }}</th>
+            <th>Day Total Min: {{ totalTimeInMin }}</th>
+            <th>Day Total HR: {{ totalTimeInHr }}</th>
+          </tr>
+        </template>
+      </b-table>
+      </div>
+      <AddTime />
+    </div>
 </template>
 
 <script>
 import { BTable } from 'bootstrap-vue'
-import AddEmployee from './AddEmployee.vue'
 import AddTime from './AddTime.vue'
-
+import html2canvas from 'html2canvas'
+import canvs2Image from '@/util/canvas2image'
+import { saveAs } from 'file-saver'
 export default {
-  name: 'Home',
+  name: 'Times',
   components: {
     'b-table': BTable,
-    AddEmployee,
     AddTime
   },
   data () {
     return {
+      json_fields: {
+        'Start Time': {
+          field: 'startTime',
+          callback: (value) => {
+            return this.convertTimeIntoAmPmFormat(value)
+          }
+        },
+        'End Time': {
+          field: 'endTime',
+          callback: (value) => {
+            return this.convertTimeIntoAmPmFormat(value)
+          }
+        },
+        'Minutes difference': {
+          callback: (value) => {
+            return this.timediff(value.startTime, value.endTime) + ' Minutes'
+          }
+        },
+        'Task Description': 'taskDesc'
+      },
       fields: [
         {
-          key: 'id', label: 'Employee ID', sortable: true, sortDirection: 'desc'
+          key: 'startTime', label: 'Start Time', sortable: false
         },
         {
-          key: 'name', label: 'Employee Name', sortable: true, class: 'text-center'
+          key: 'endTime', label: 'End Time', sortable: false, class: 'text-center'
         },
         {
-          key: 'email', label: 'Email', sortable: true
+          key: 'difference', label: 'Minutes', sortable: false
         },
         {
-          key: 'contact', label: 'Contact', sortable: true
+          key: 'taskDesc', label: 'Task Description', sortable: false
         },
         {
           key: 'action', label: 'Actions'
         }
       ],
+      displayData: this.$store.state.listTimes,
       currentPage: 1,
-      totalRows: 0,
-      perPage: 2,
-      sortBy: '',
-      sortDesc: false,
-      sortDirection: 'asc',
-      filter: null,
-      filterOn: [],
-      pageOptions: [2, 5, 10, 15]
+      selectDate: new Date().toISOString().slice(0, 10)
     }
   },
   computed: {
-    sortOptions () {
-      // Create an options list from our fields
-      return this.fields
-        .filter(f => f.sortable)
-        .map(f => {
-          return { text: f.label, value: f.key }
+    filterData () {
+      return this.displayData
+        .filter((data) => {
+          return data.dateSelect === this.selectDate
         })
     },
-    bindListEmployees () {
-      return this.$store.state.listEmployee
+    totalTimeInMin () {
+      const total = this.filterData.reduce((previousValue, currentValue) => {
+        return previousValue + this.timediff(currentValue.startTime, currentValue.endTime)
+      }, 0)
+      return total
+    },
+    totalTimeInHr () {
+      return Math.floor(this.totalTimeInMin / 60) + ':' + this.totalTimeInMin % 60
+    },
+    footerData () {
+      return [
+        'Date: ' + this.selectDate,
+        'Day Total Min: ' + this.totalTimeInMin,
+        'Day Total HR: ' + this.totalTimeInHr
+      ]
     }
-  },
-  watch: {
-    bindListEmployees: {
-      deep: true,
-      handler: function (list) {
-        this.totalRows = list.length
-      }
-    }
-  },
-  created () {
-    this.loadlistEmployees()
   },
   methods: {
+    printThis () {
+      const el = this.$refs.exportPng
+
+      html2canvas(el)
+        .then(canvas => {
+          const img = canvs2Image.getImage(canvas)
+          console.log(img)
+          saveAs(img, this.selectDate + '.png')
+        })
+        .catch(err => {
+          console.log('error', err)
+        })
+    },
     // New
     addTime () {
       this.$root.$emit('add-time', {})
       this.$bvModal.show('addNewTime')
     },
-    // Old
-    loadlistEmployees () {
-      this.totalRows = this.$store.state.listEmployee.length
-    },
-    addEmployee () {
-      this.$root.$emit('add-employee', {})
-      this.$bvModal.show('addNewEmployee')
-    },
-    editEmployee (employee) {
-      this.$root.$emit('edit-employee', Object.assign({}, employee.item))
-      this.$bvModal.show('addNewEmployee')
-    },
-    deleteEmployee (employee) {
-      this.$bvModal.msgBoxConfirm('Please confirm that you want to delete employee.', {
+    deleteTime (time) {
+      this.$bvModal.msgBoxConfirm('Please confirm that you want to delete Time Slot.', {
         title: 'Please Confirm',
         size: 'mm',
         buttonSize: 'sm',
@@ -246,14 +174,31 @@ export default {
       })
         .then((value) => {
           if (value) {
-            this.$store.dispatch('deleteStoreEmployee', { employee: employee }) // dispatch store action
+            this.$store.dispatch('deleteStoreTime', { times: time }) // dispatch store action
           }
         })
     },
-    onFiltered (filteredItems) {
-      // Trigger pagination to update the number of buttons/pages due to filtering
-      this.totalRows = filteredItems.length
-      this.currentPage = 1
+    convertTimeIntoAmPmFormat (time) {
+      time = time.split(':')
+      time[3] = time[0] < 12 ? 'AM' : 'PM'
+
+      time[0] = time[0] % 12 || 12
+      time = time[0] + ':' + time[1] + ' ' + time[3]
+      return time // return adjusted time or original string
+    },
+    timediff (valuestart, valuestop) {
+      const today = new Date()
+      const td = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + (today.getDate() + 1)).slice(-2)
+      const date1 = new Date(td + ' ' + valuestart).getTime()
+      const date2 = new Date(td + ' ' + valuestop).getTime()
+
+      const msec = date2 - date1
+      const mins = Math.floor(msec / 60000)
+      return mins
+    },
+    editTime (time) {
+      this.$root.$emit('edit-time', Object.assign({}, time.item))
+      this.$bvModal.show('addNewTime')
     }
   }
 }
