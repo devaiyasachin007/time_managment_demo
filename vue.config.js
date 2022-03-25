@@ -1,5 +1,5 @@
 module.exports = {
   publicPath: process.env.NODE_ENV === 'production'
-    ? '/vue_crud_bootstrap/'
+    ? '/time_managment_demo/'
     : '/'
 }
