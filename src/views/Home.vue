@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <h3 class="heading">Time Management</h3>
+    <h3 class="heading mt-3">Time Management</h3>
     <b-row>
       <b-col lg="3" class="my-1">
       <b-form-datepicker
@@ -63,7 +63,7 @@
 
 <script>
 import { BTable } from 'bootstrap-vue'
-import AddTime from './AddTime.vue'
+import AddTime from '@/component/AddTime.vue'
 import html2canvas from 'html2canvas'
 import canvs2Image from '@/util/canvas2image'
 import { saveAs } from 'file-saver'
