@@ -149,7 +149,7 @@ export default {
         .then(canvas => {
           const img = canvs2Image.getImage(canvas)
           console.log(img)
-          saveAs(img, 's.png')
+          saveAs(img, this.selectDate + '.png')
         })
         .catch(err => {
           console.log('error', err)
