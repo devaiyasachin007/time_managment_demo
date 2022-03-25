@@ -30,7 +30,7 @@
       </b-button>
     </div>
     <div ref="exportPng">
-      <b-table hover bordered :items="filterData" responsive="sm" :fields="fields" show-empty>
+      <b-table hover bordered :items="filterData" responsive="sm" :fields="fields" show-empty >
         <template v-slot:cell(startTime)="data">
           {{ convertTimeIntoAmPmFormat(data.value) }}
         </template>
@@ -48,16 +48,14 @@
             Delete
           </b-button>
         </template>
+        <template v-slot:custom-foot>
+          <tr>
+            <th>Day: {{ selectDate }}</th>
+            <th>Day Total Min: {{ totalTimeInMin }}</th>
+            <th>Day Total HR: {{ totalTimeInHr }}</th>
+          </tr>
+        </template>
       </b-table>
-        <div style="float:left;margin:10px;">
-          <b-button size="sm">Day: {{ selectDate }}</b-button>
-        </div>
-        <div style="float:left;margin:10px;">
-          <b-button size="sm">Day Total Min: {{ totalTimeInMin }} </b-button>
-        </div>
-        <div style="float:left;margin:10px;">
-          <b-button size="sm">Day Total HR: {{ totalTimeInHr }}</b-button>
-        </div>
       </div>
       <AddTime />
     </div>
@@ -98,9 +96,6 @@ export default {
         'Task Description': 'taskDesc'
       },
       fields: [
-        {
-          key: 'dateSelect', label: 'Date', sortable: false
-        },
         {
           key: 'startTime', label: 'Start Time', sortable: false
         },
