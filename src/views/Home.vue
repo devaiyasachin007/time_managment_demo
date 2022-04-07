@@ -148,10 +148,10 @@ export default {
       html2canvas(el)
         .then(canvas => {
           const img = canvs2Image.getImage(canvas)
-          console.log(img)
           saveAs(img, this.selectDate + '.png')
         })
         .catch(err => {
+        // eslint-disable-next-line no-console
           console.log('error', err)
         })
     },
